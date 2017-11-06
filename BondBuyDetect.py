@@ -19,6 +19,7 @@ from selenium.webdriver.common.keys import Keys
 import time
 import re
 import tamCommonLib
+import credentials
 
 def send_mail(fro, to, subject, text, files=[], mtype='plain'):
     #assert type(server) == dict
@@ -63,8 +64,8 @@ try:
         if elem is not None:
             driver.find_element_by_id('aw-login-user-name').send_keys(Keys.TAB)  # 定位并输入用户名
             driver.find_element_by_id('aw-login-user-password').send_keys(Keys.TAB)  # 定位并输入用户名
-            driver.find_element_by_id('aw-login-user-name').send_keys('saturn99')   #定位并输入用户名
-            driver.find_element_by_id('aw-login-user-password').send_keys('64445169')  # 定位并输入用户名
+            driver.find_element_by_id('aw-login-user-name').send_keys(credentials.jisilu_user)   #定位并输入用户名
+            driver.find_element_by_id('aw-login-user-password').send_keys(credentials.jisilu_password)  # 定位并输入用户名
             driver.find_element_by_id('login_submit').click()
             time.sleep(page_wait)
 

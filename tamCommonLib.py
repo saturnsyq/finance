@@ -22,18 +22,16 @@ import getpass
 import time
 import xlrd
 import os
-import xlwt
-import nltk
 import unicodedata
 import re
 import datetime
 
 ## comment variables ##########################################
 ## time zone
-mysql_host = 'ud094661c879c59fa6e9e.ant.amazon.com'
+mysql_host = 'ud094661c879c59fa6e9e'
 mysql_user = 'tam'
-mysql_password = 'kindle'
-mysql_default_db = 'tam_db'
+mysql_password = '***'
+mysql_default_db = '***'
 
 ###############################################################
 
