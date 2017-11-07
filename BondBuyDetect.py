@@ -48,7 +48,12 @@ def send_mail(fro, to, subject, text, files=[], mtype='plain'):
 
 # url='https://www.jisilu.cn/data/bond/?do_search=true&sort_column=&sort_order=&forall=0&treasury=1&from_rating=1&from_issuer_rating=1&from_year_left=0&from_repo=0.56&from_ytm=5.3&from_volume=0&from_market=&y1=&y2=&to_rating=99&to_issuer_rating=99&to_year_left=2&to_repo=2&to_ytm=8&to_volume='
 url='https://www.jisilu.cn/data/bond/detail/%s'
-detect_list = [('136654',10.5,1),('136547',8,1),('136188',12,1)]
+detect_list = [
+('136515',11,1),('124135',11,1),('136259',11,1),('122846',11,1),('136447',12,1),('136547',11,1),('136654',10.5,1),('136654',10.5,1),('136167',13,1),
+('122231',11,1),('112279',11,1),('122099',11,1),('122814',11,1),('112418',12,1),('136081',11,1),('136206',11.5,1),('112373',12.5,1),('136033',11,1),
+('122516',11,1),('122219',12,1),('136210',12,1),('112340',12,1),('112320',12,1),('112452',12,1),('112048',12,1),('112394',12,1),('122476',14,1),
+('136188',12,1)
+]
 repo_rate = 3.6    #回购利率，即资金成本
 page_wait = 3      #wait for 3 seconds to load pages content
 try:
@@ -80,6 +85,10 @@ try:
             table = soup.find('table', id='flex0')
             repo_info=table.find('thead').find('table').find_all('tr')[2].find_all('td')[1]
             repo=float(re.findall(r'^回购资金利用率：([\d\.]+)%?$',repo_info.getText().strip())[0])
+            #adjust the italic font repo to 0
+            span=repo_info.find('span')
+            if span is not None and span.attrs.get('style') is not None and span.attrs['style'].find('font-style:italic')>=0:
+                repo = 0
             tbody = table.find_all('tbody')[1]
             for sell in ('sell1','sell2','sell3','sell4','sell5'):
                 tr=tbody.find('tr',id=sell)
