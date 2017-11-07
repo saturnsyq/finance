@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# coding=utf-8
+
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.keys import Keys
@@ -53,7 +56,7 @@ try:
 
     ssl._create_default_https_context = ssl._create_unverified_context  # 取消证书认证
     try:
-        driver = webdriver.PhantomJS()
+        driver = webdriver.PhantomJS(executable_path='/home/local/ANT/yongqis/finance/phantomjs')
         driver.get('https://www.jisilu.cn/login/')
         elem = driver.find_element_by_id('aw-login-user-name')
         if elem is not None:
