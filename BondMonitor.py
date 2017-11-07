@@ -20,7 +20,7 @@ from email.mime.base import MIMEBase
 from email.utils import COMMASPACE,formatdate
 from email import encoders
 
-mail_list = ['saturn_syq@hotmail.com']
+mail_list = ['yongqis@amazon.com']
 display_in_mail = 1
 
 def send_mail(fro, to, subject, text, files=[], mtype='plain'):
@@ -84,7 +84,10 @@ try:
                 for td in tr.findAll('td'):
                     col+=1
                     if col in (1,2,6,8,10,14):
-                        row.append(td.getText().strip())
+                        if col==14 and td.attrs.get('style') is not None and td.attrs['style'].find('font-style:italic')>=0:
+                            row.append('0.00%')
+                        else:
+                            row.append(td.getText().strip())
                 if len(row)==6:
                     if row[3].find('/')>0: #两个期限，分成两条记录
                         duration=row[3].split('/')
@@ -110,7 +113,7 @@ try:
                         print_list.append([irow[0], irow[1], irow[3], round(ytm, 2), round(total, 2)])
                         #print('%s,%s,%s  - total=%s' % (irow[0],irow[1],irow[3],round(total,2)))
             if display_in_mail==1:
-                body = tamCommonLib.table_html(meet_list, '')
+                body = tamCommonLib.table_html_with_rn(meet_list, '')
                 send_mail('cn-tam-auto@amazon.com', mail_list, 'Bond Monitor List', body, [], 'html')
             else:
                 for row in print_list:
