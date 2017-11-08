@@ -73,7 +73,7 @@ try:
             driver.find_element_by_id('login_submit').click()
             time.sleep(page_wait)
 
-        meet_list =[['code','volume','duration','ytm','actual_ytm']]
+        meet_list =[['code','volume(w)','duration','ytm','actual_ytm']]
         for code, bar, vol in detect_list:
             html_code='<a href="%s">%s</a>' % (url%code,code)
             driver.get(url%code)
@@ -97,7 +97,7 @@ try:
                     for td in tr.findAll('td'):
                         col += 1
                         if col == 2: price  = float(td.getText().strip())
-                        if col == 3: volume = float(td.getText().strip())
+                        if col == 3: volume = round(float(td.getText().strip()),1)
                         if col == 5: ytm1 = float(td.getText().strip())
                         if col == 7: dur1 = float(td.getText().strip())
                         if col == 10: ytm2 = float(td.getText().strip())
