@@ -51,11 +51,10 @@ url='https://www.jisilu.cn/data/bond/detail/%s'
 detect_list = [
 ('136515',11,1),('124135',11,1),('136259',11,1),('122846',11,1),('136447',12,1),('136547',11,1),('136654',10.5,1),('136654',10.5,1),('136167',13,1),
 ('122231',11,1),('112279',11,1),('122099',11,1),('122814',11,1),('112418',12,1),('136081',11,1),('136206',11.5,1),('112373',12.5,1),('136033',11,1),
-('122516',11,1),('122219',12,1),('136210',12,1),('112340',12,1),('112320',12,1),('112452',12,1),('112048',12,1),('112394',12,1),('122476',14,1),
-('136188',12,1)
+('122516',11,1),('122219',12,1),('136210',12,1),('112340',12,1),('112320',12,1),('112452',12,1),('112048',12,1),('112394',12,1),('122476',14,1),('136188',12,1)
 ]
 repo_rate = 3.6    #回购利率，即资金成本
-page_wait = 3      #wait for 3 seconds to load pages content
+page_wait = 4      #wait for 3 seconds to load pages content
 try:
     from selenium import webdriver
     import ssl
@@ -118,7 +117,7 @@ try:
         #send warning mail
         if len(meet_list)>1:
             body = tamCommonLib.table_html(meet_list, '')
-            send_mail('cn-tam-auto@amazon.com', ['yongqis@amazon.com'], 'Bond Detection List', body, [],'html')
+            send_mail('yongqis@amazon.com', ['yongqis@amazon.com'], 'Bond Detection List', body, [],'html')
     except:
         print ('请安装phantomjs')
 
