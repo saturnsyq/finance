@@ -20,6 +20,7 @@ import time
 import re
 import tamCommonLib
 import credentials
+import sys
 
 def send_mail(fro, to, subject, text, files=[], mtype='plain'):
     #assert type(server) == dict
@@ -55,71 +56,77 @@ detect_list = [
 ]
 repo_rate = 3.6    #回购利率，即资金成本
 page_wait = 4      #wait for 3 seconds to load pages content
-try:
-    from selenium import webdriver
-    import ssl
 
-    ssl._create_default_https_context = ssl._create_unverified_context  # 取消证书认证
+if __name__ == '__main__':
+    super_bar = 0   # if set it to 0, then it will not take effect.
+    if len(sys.argv) > 1:
+        super_bar = float(sys.argv[1].strip())
     try:
-        driver = webdriver.PhantomJS(executable_path='/home/local/ANT/yongqis/finance/phantomjs')
-        driver.get('https://www.jisilu.cn/login/')
-        time.sleep(page_wait)
-        elem = driver.find_element_by_id('aw-login-user-name')
-        if elem is not None:
-            driver.find_element_by_id('aw-login-user-name').send_keys(Keys.TAB)  # 定位并输入用户名
-            driver.find_element_by_id('aw-login-user-password').send_keys(Keys.TAB)  # 定位并输入用户名
-            driver.find_element_by_id('aw-login-user-name').send_keys(credentials.jisilu_user)   #定位并输入用户名
-            driver.find_element_by_id('aw-login-user-password').send_keys(credentials.jisilu_password)  # 定位并输入用户名
-            driver.find_element_by_id('login_submit').click()
-            time.sleep(page_wait)
+        from selenium import webdriver
+        import ssl
 
-        meet_list =[['code','volume(w)','duration','ytm','actual_ytm']]
-        for code, bar, vol in detect_list:
-            html_code='<a href="%s">%s</a>' % (url%code,code)
-            driver.get(url%code)
+        ssl._create_default_https_context = ssl._create_unverified_context  # 取消证书认证
+        try:
+            driver = webdriver.PhantomJS(executable_path='/home/local/ANT/yongqis/finance/phantomjs')
+            driver.get('https://www.jisilu.cn/login/')
             time.sleep(page_wait)
-            driver.implicitly_wait(page_wait)  # 等待3秒
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(driver.page_source, "html.parser")
-            table = soup.find('table', id='flex0')
-            repo_info=table.find('thead').find('table').find_all('tr')[2].find_all('td')[1]
-            repo=float(re.findall(r'^回购资金利用率：([\d\.]+)%?$',repo_info.getText().strip())[0])
-            #adjust the italic font repo to 0
-            span=repo_info.find('span')
-            if span is not None and span.attrs.get('style') is not None and span.attrs['style'].find('font-style:italic')>=0:
-                repo = 0
-            tbody = table.find_all('tbody')[1]
-            for sell in ('sell1','sell2','sell3','sell4','sell5'):
-                tr=tbody.find('tr',id=sell)
-                if tr is not None:
-                    col = 0
-                    price, volume, dur1, ytm1, dur2, ytm2 = 0,0,0,0,0,0
-                    for td in tr.findAll('td'):
-                        col += 1
-                        if col == 2: price  = float(td.getText().strip())
-                        if col == 3: volume = round(float(td.getText().strip()),1)
-                        if col == 5: ytm1 = float(td.getText().strip())
-                        if col == 7: dur1 = float(td.getText().strip())
-                        if col == 10: ytm2 = float(td.getText().strip())
-                        if col == 12: dur2 = float(td.getText().strip())
-                    act_ytm = round(ytm1,2)
-                    if repo>0:
-                        act_ytm = round(ytm1 + (ytm1 - repo_rate) * 0.95 * 1/(100/(0.88*repo)-1),2)
-                    if act_ytm>bar and volume>vol:
-                        meet_list.append([html_code,volume,dur1,ytm1,act_ytm])
-                        break
-                    act_ytm = round(ytm2,2)
-                    if repo > 0:
-                        act_ytm = round(ytm2 + (ytm2 - repo_rate) * 0.95 * 1 / (100 / (0.88 * repo) - 1),2)
-                    if act_ytm > bar and volume > vol:
-                        meet_list.append([html_code, volume, dur2, ytm2, act_ytm])
-                        break
-        #send warning mail
-        if len(meet_list)>1:
-            body = tamCommonLib.table_html(meet_list, '')
-            send_mail('yongqis@amazon.com', ['yongqis@amazon.com'], 'Bond Detection List', body, [],'html')
-    except:
-        print ('请安装phantomjs')
+            elem = driver.find_element_by_id('aw-login-user-name')
+            if elem is not None:
+                driver.find_element_by_id('aw-login-user-name').send_keys(Keys.TAB)  # 定位并输入用户名
+                driver.find_element_by_id('aw-login-user-password').send_keys(Keys.TAB)  # 定位并输入用户名
+                driver.find_element_by_id('aw-login-user-name').send_keys(credentials.jisilu_user)   #定位并输入用户名
+                driver.find_element_by_id('aw-login-user-password').send_keys(credentials.jisilu_password)  # 定位并输入用户名
+                driver.find_element_by_id('login_submit').click()
+                time.sleep(page_wait)
 
-except ImportError:
-    print('No module named selenium. 请安装selenium模块')
+            meet_list =[['code','volume(w)','duration','ytm','actual_ytm']]
+            for code, bar, vol in detect_list:
+                if super_bar>0: bar = super_bar
+                html_code='<a href="%s">%s</a>' % (url%code,code)
+                driver.get(url%code)
+                time.sleep(page_wait)
+                driver.implicitly_wait(page_wait)  # 等待3秒
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(driver.page_source, "html.parser")
+                table = soup.find('table', id='flex0')
+                repo_info=table.find('thead').find('table').find_all('tr')[2].find_all('td')[1]
+                repo=float(re.findall(r'^回购资金利用率：([\d\.]+)%?$',repo_info.getText().strip())[0])
+                #adjust the italic font repo to 0
+                span=repo_info.find('span')
+                if span is not None and span.attrs.get('style') is not None and span.attrs['style'].find('font-style:italic')>=0:
+                    repo = 0
+                tbody = table.find_all('tbody')[1]
+                for sell in ('sell1','sell2','sell3','sell4','sell5'):
+                    tr=tbody.find('tr',id=sell)
+                    if tr is not None:
+                        col = 0
+                        price, volume, dur1, ytm1, dur2, ytm2 = 0,0,0,0,0,0
+                        for td in tr.findAll('td'):
+                            col += 1
+                            if col == 2: price  = float(td.getText().strip())
+                            if col == 3: volume = round(float(td.getText().strip()),1)
+                            if col == 5: ytm1 = float(td.getText().strip())
+                            if col == 7: dur1 = float(td.getText().strip())
+                            if col == 10: ytm2 = float(td.getText().strip())
+                            if col == 12: dur2 = float(td.getText().strip())
+                        act_ytm = round(ytm1,2)
+                        if repo>0:
+                            act_ytm = round(ytm1 + (ytm1 - repo_rate) * 0.95 * 1/(100/(0.88*repo)-1),2)
+                        if act_ytm>bar and volume>vol:
+                            meet_list.append([html_code,volume,dur1,ytm1,act_ytm])
+                            break
+                        act_ytm = round(ytm2,2)
+                        if repo > 0:
+                            act_ytm = round(ytm2 + (ytm2 - repo_rate) * 0.95 * 1 / (100 / (0.88 * repo) - 1),2)
+                        if act_ytm > bar and volume > vol:
+                            meet_list.append([html_code, volume, dur2, ytm2, act_ytm])
+                            break
+            #send warning mail
+            if len(meet_list)>1:
+                body = tamCommonLib.table_html(meet_list, '')
+                send_mail('yongqis@amazon.com', ['yongqis@amazon.com'], 'Bond Detection List', body, [],'html')
+        except:
+            print ('请安装phantomjs')
+
+    except ImportError:
+        print('No module named selenium. 请安装selenium模块')
