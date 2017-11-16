@@ -97,11 +97,11 @@ d0.volume - d2.volume net2_income,
 d0.volume - d3.volume net3_income,
 d0.volume - d4.volume net4_income,
 d0.volume - d5.volume net5_income,
-d0.volume - d5.volume net6_income,
-d0.volume - d5.volume net7_income,
-d0.volume - d5.volume net10_income,
-d0.volume - d5.volume net14_income,
-d0.volume - d5.volume net28_income
+d0.volume - d6.volume net6_income,
+d0.volume - d7.volume net7_income,
+d0.volume - d10.volume net10_income,
+d0.volume - d14.volume net14_income,
+d0.volume - d28.volume net28_income
 from ( select code,name,volume,percent from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=0) ) d0
 left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=1) ) d1 on d0.code=d1.code
 left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=2) ) d2 on d0.code=d2.code
