@@ -71,6 +71,49 @@ if __name__ == '__main__':
             percent = round(float(re.findall(r'^([0-9]*\.?[0-9]+|[0-9]+\.?[0-9]*)%$',each[3])[0])/100,4)
             cursor.execute("insert finance.hk_mainland_hist(ss_date,code,name,volume,percent) values('%s','%s','%s',%s,%s)" % (ss_date, each[0],each[1],vol,str(percent)))
             conn.commit()
+        #get the statistics data
+        cursor.execute('drop table if exists temp.tt_ss')
+        sql='''
+        create table temp.tt_ss as
+Select m.*,(@rowNum:=@rowNum+1) as row_num
+From ( select distinct ss_date from finance.hk_mainland_hist ) m,
+(Select (@rowNum :=-1) ) b
+Order by m.ss_date Desc
+       '''
+        cursor.execute(sql)
+        cursor.execute('truncate table finance.hk_mainland_stat')
+        conn.commit()
+        sql='''
+        insert finance.hk_mainland_stat
+        select
+d0.code,
+d0.name,
+d0.volume,
+d0.percent,
+d0.volume - d1.volume net1_income,
+d0.volume - d2.volume net2_income,
+d0.volume - d3.volume net3_income,
+d0.volume - d4.volume net4_income,
+d0.volume - d5.volume net5_income,
+d0.volume - d5.volume net6_income,
+d0.volume - d5.volume net7_income,
+d0.volume - d5.volume net10_income,
+d0.volume - d5.volume net14_income,
+d0.volume - d5.volume net28_income
+from ( select code,name,volume,percent from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=0) ) d0
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=1) ) d1 on d0.code=d1.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=2) ) d2 on d0.code=d2.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=3) ) d3 on d0.code=d3.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=4) ) d4 on d0.code=d4.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=5) ) d5 on d0.code=d5.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=6) ) d6 on d0.code=d6.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=7) ) d7 on d0.code=d7.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=10) ) d10 on d0.code=d10.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=14) ) d14 on d0.code=d14.code
+left join ( select code,volume from finance.hk_mainland_hist where ss_date=(select ss_date from temp.tt_ss where row_num=28) ) d28 on d0.code=d28.code
+        '''
+        cursor.execute(sql)
+        conn.commit()
         conn.close()
 
     except Exception as e:
