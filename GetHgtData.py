@@ -20,6 +20,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email.utils import COMMASPACE,formatdate
 from email import encoders
+import datetime
 
 mail_list = ['yongqis@amazon.com']
 display_in_mail = 1
@@ -62,6 +63,9 @@ if __name__ == '__main__':
             area = soup.find('div',id='pnlResult')
             fields = re.findall(r'(\d{2})/(\d{2})/(\d{4})',area.find('div').getText().strip())[0]
             ss_date = "%s-%s-%s" % (fields[2],fields[1],fields[0])
+            #skip running for weekend
+            if datetime.datetime.strptime(ss_date,'%Y-%m-%d').weekday() in (5,6):
+                break
             data = []
             for row in area.find_all('tr',attrs={'class':re.compile('row(0|1)')}):
                 each = []
