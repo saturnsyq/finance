@@ -80,6 +80,7 @@ if __name__ == '__main__':
                 time.sleep(page_wait)
 
             meet_list =[['code','volume(w)','duration','ytm','actual_ytm']]
+            print("Login, start to check data.")
             for code, bar, vol in detect_list:
                 if super_bar>0: bar = super_bar
                 html_code='<a href="%s">%s</a>' % (url%code,code)
@@ -96,31 +97,36 @@ if __name__ == '__main__':
                 if span is not None and span.attrs.get('style') is not None and span.attrs['style'].find('font-style:italic')>=0:
                     repo = 0
                 tbody = table.find_all('tbody')[1]
-                for sell in ('sell1','sell2','sell3','sell4','sell5'):
-                    tr=tbody.find('tr',id=sell)
-                    if tr is not None:
-                        col = 0
-                        price, volume, dur1, ytm1, dur2, ytm2 = 0,0,0,0,0,0
-                        for td in tr.findAll('td'):
-                            col += 1
-                            if col == 2: price  = float(td.getText().strip())
-                            if col == 3: volume = round(float(td.getText().strip()),1)
-                            if col == 5: ytm1 = float(td.getText().strip())
-                            if col == 7: dur1 = float(td.getText().strip())
-                            if col == 10: ytm2 = float(td.getText().strip())
-                            if col == 12: dur2 = float(td.getText().strip())
-                        act_ytm = round(ytm1,2)
-                        if repo>0:
-                            act_ytm = round(ytm1 + (ytm1 - repo_rate) * 0.95 * 1/(100/(0.88*repo)-1),2)
-                        if act_ytm>bar and volume>vol:
-                            meet_list.append([html_code,volume,dur1,ytm1,act_ytm])
-                            break
-                        act_ytm = round(ytm2,2)
-                        if repo > 0:
-                            act_ytm = round(ytm2 + (ytm2 - repo_rate) * 0.95 * 1 / (100 / (0.88 * repo) - 1),2)
-                        if act_ytm > bar and volume > vol:
-                            meet_list.append([html_code, volume, dur2, ytm2, act_ytm])
-                            break
+                try:
+                    for sell in ('sell1','sell2','sell3','sell4','sell5'):
+                        tr=tbody.find('tr',id=sell)
+                        if tr is not None:
+                            col = 0
+                            price, volume, dur1, ytm1, dur2, ytm2 = 0,0,0,0,0,0
+                            for td in tr.findAll('td'):
+                                col += 1
+                                if col == 2: price  = float(td.getText().strip())
+                                if col == 3: volume = round(float(td.getText().strip()),1)
+                                if col == 5: ytm1 = float(td.getText().strip())
+                                if col == 7: dur1 = float(td.getText().strip())
+                                if col == 10: ytm2 = float(td.getText().strip())
+                                if col == 12: dur2 = float(td.getText().strip())
+                            act_ytm = round(ytm1,2)
+                            if repo>0:
+                                act_ytm = round(ytm1 + (ytm1 - repo_rate) * 0.95 * 1/(100/(0.88*repo)-1),2)
+                            if act_ytm>bar and volume>vol:
+                                meet_list.append([html_code,volume,dur1,ytm1,act_ytm])
+                                break
+                            act_ytm = round(ytm2,2)
+                            if repo > 0:
+                                act_ytm = round(ytm2 + (ytm2 - repo_rate) * 0.95 * 1 / (100 / (0.88 * repo) - 1),2)
+                            if act_ytm > bar and volume > vol:
+                                meet_list.append([html_code, volume, dur2, ytm2, act_ytm])
+                                break
+                except:
+                    #do nothing, just skipping this one
+                    print("error happend, skip "+code)
+
             #send warning mail
             if len(meet_list)>1:
                 body = tamCommonLib.table_html(meet_list, '')
