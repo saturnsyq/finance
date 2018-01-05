@@ -75,7 +75,8 @@ try:
         # print(soup)
         table = soup.find('tbody', id='bond_table_body')
         data =[]
-        meet_list = [['code','name','duration','ytm','actual_ytm']]
+        #meet_list = [['code','name','duration','ytm','actual_ytm']]
+        meet_list=[]
         print_list = []
         if table is not None:
             for tr in table.findAll('tr'):
@@ -113,6 +114,8 @@ try:
                         print_list.append([irow[0], irow[1], irow[3], round(ytm, 2), round(total, 2)])
                         #print('%s,%s,%s  - total=%s' % (irow[0],irow[1],irow[3],round(total,2)))
             if display_in_mail==1:
+                meet_list.sort(key=lambda bond:bond[4],reverse=True)
+                meet_list.insert(0,['code','name','duration','ytm','actual_ytm'])
                 body = tamCommonLib.table_html_with_rn(meet_list, '')
                 send_mail('cn-tam-auto@amazon.com', mail_list, 'Bond Monitor List', body, [], 'html')
             else:
