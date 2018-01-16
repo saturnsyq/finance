@@ -84,7 +84,8 @@ try:
                 row=[]
                 for td in tr.findAll('td'):
                     col+=1
-                    if col in (1,2,6,8,10,14):
+                    # if col in (1,2,6,8,10,14):
+                    if col in (1, 2, 6, 9, 10, 14):
                         if col==14 and td.attrs.get('style') is not None and td.attrs['style'].find('font-style:italic')>=0:
                             row.append('0.00%')
                         else:
@@ -117,7 +118,7 @@ try:
                 meet_list.sort(key=lambda bond:bond[4],reverse=True)
                 meet_list.insert(0,['code','name','duration','ytm','actual_ytm'])
                 body = tamCommonLib.table_html_with_rn(meet_list, '')
-                send_mail('cn-tam-auto@amazon.com', mail_list, 'Bond Monitor List', body, [], 'html')
+                send_mail('yongqis@amazon.com', mail_list, 'Bond Monitor List', body, [], 'html')
             else:
                 for row in print_list:
                     print('%s,%s,dur=%s,ytm=%s, act_ytm=%s' % (row[0],row[1],row[2],row[3],row[4]) )
