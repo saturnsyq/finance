@@ -162,7 +162,10 @@ if __name__ == '__main__':
                             data.append([row[0],row[1],row[2],duration[1],ytm[1],row[5]])
                         else:
                             data.append(row)
+                done_list={}
                 for irow in data:
+                    if done_list.get(irow[0]) is not None: continue
+                    done_list[irow[0]]=1
                     code_link = 'https://www.jisilu.cn/data/bond/detail/%s' % irow[0]
                     html_code = '<a href="%s">%s</a>' % (code_link, irow[0])
                     if irow[5][-1]=='%':
