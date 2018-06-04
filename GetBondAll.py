@@ -157,21 +157,34 @@ if __name__ == '__main__':
                                 row.append(td.getText().strip())
                     cnt=cursor.execute("select code from finance.bond_all where code='%s'"%row[0])
                     #sh or sz
+                    loc=None
                     r=requests.get("http://hq.sinajs.cn/list=sh%s"%row[0])
-                    if '=""' in BeautifulSoup(r.content,"html.parser").getText():
-                        loc='sz'
-                    else:
+                    if '=""' not in BeautifulSoup(r.content,"html.parser").getText():
                         loc='sh'
+                    else:
+                        r = requests.get("http://hq.sinajs.cn/list=sz%s" % row[0])
+                        if '=""' not in BeautifulSoup(r.content, "html.parser").getText():
+                            loc='sz'
+
 
                     if not cnt and len(row)==5:
                         if row[2].find('/')>0: #两个期限，分成两条记录
                             duration=row[2].split('/')
                             diff = int(round(float(duration[1]) - float(duration[0]),0))
                             xdate=str(int(row[4][:4])-diff)+row[4][4:]
-                            cursor.execute("insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s','%s',%s,'%s','%s','n')"%(row[0],loc,row[1],row[3],xdate,row[4]))
+                            if loc is None:
+                                cursor.execute("insert finance.bond_all(code,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s',%s,'%s','%s','n')"%(row[0],row[1],row[3],xdate,row[4]))
+                            else:
+                                cursor.execute("insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s','%s',%s,'%s','%s','n')" % (
+                                    row[0], loc, row[1], row[3], xdate, row[4]))
                             conn.commit()
                         else:
-                            cursor.execute(
+                            if loc is None:
+                                cursor.execute(
+                                    "insert finance.bond_all(code,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s',%s,'%s',null,'n')" % (
+                                        row[0], row[1], row[3], row[4]))
+                            else:
+                                cursor.execute(
                                 "insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s','%s',%s,'%s',null,'n')" % (
                                 row[0],loc, row[1], row[3], row[4]))
                             conn.commit()
