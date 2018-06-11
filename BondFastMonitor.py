@@ -129,26 +129,37 @@ if __name__ == '__main__':
             for each in ret_list:
                 temp=re.findall(r'^var hq_str_(\w+)="(.*)"$',each)
                 if len(temp)==0 or len(temp[0][1])==0: continue
-                s1_v,s1_p,s2_v,s2_p,s3_v,s3_p,s4_v,s4_p,s5_v,s5_p=temp[0][1].split(',')[20:30]
-                if s1_v==0: continue
+                #s1_v,s1_p,s2_v,s2_p,s3_v,s3_p,s4_v,s4_p,s5_v,s5_p=temp[0][1].split(',')[20:30]
+                sells=temp[0][1].split(',')[20:30]
+                need_detect=False
+                for i in range(5):
+                    if float(sells[2*i])>10:
+                        s1_v=sells[2*i]
+                        s1_p=sells[2*i+1]
+                        need_detect=True
+                        break
+                if not need_detect: continue
                 #calculate xdate
                 row=all_bond[temp[0][0]]
                 mat=row[3]
                 dcf=0
                 if cur.date()>=datetime.date(cur.year,mat.month,mat.day):
                     next_coupon_day=datetime.date(cur.year+1,mat.month,mat.day)
-                    coupon_days = (cur.date() - datetime.date(cur.year,mat.month,mat.day)).days
+                    coupon_days = (cur.date() - datetime.date(cur.year,mat.month,mat.day)).days + 1
                 else:
                     next_coupon_day = datetime.date(cur.year, mat.month, mat.day)
-                    coupon_days = (cur.date() - datetime.date(cur.year-1, mat.month, mat.day)).days
-                while next_coupon_day<=mat:
-                    span=round((next_coupon_day-cur.date()).days/365,4)
-                    if next_coupon_day==mat:
-                        dcf += (100 + float(row[2])) / math.pow(1 + float(row[5]) * 0.01, span)
-                        break
-                    else:
-                        dcf+=float(row[2])/math.pow(1+float(row[5])*0.01,span)
-                        next_coupon_day=datetime.date(next_coupon_day.year+1,next_coupon_day.month,next_coupon_day.day)
+                    coupon_days = (cur.date() - datetime.date(cur.year-1, mat.month, mat.day)).days + 1
+                if (mat - cur.date()).days < 365:
+                    dcf = (100 + float(row[2])) /( 1 + float(row[5]) * round((next_coupon_day-cur.date()).days/365,4) )
+                else:
+                    while next_coupon_day<=mat:
+                        span=round((next_coupon_day-cur.date()).days/365,4)
+                        if next_coupon_day==mat:
+                            dcf += (100 + float(row[2])) / math.pow(1 + float(row[5]) * 0.01, span)
+                            break
+                        else:
+                            dcf+=float(row[2])/math.pow(1+float(row[5])*0.01,span)
+                            next_coupon_day=datetime.date(next_coupon_day.year+1,next_coupon_day.month,next_coupon_day.day)
                 full_price=float(s1_p)+float(row[2])*coupon_days/365
                 if full_price<dcf and send_list.get(row[0]) is None:
                     code_link = 'https://www.jisilu.cn/data/bond/detail/%s' % row[1]
@@ -159,7 +170,7 @@ if __name__ == '__main__':
             if len(meet_list)>0:
                 meet_list.insert(0, ['code', 'name','price', 'vol', 'ytm_bar','mature_date','remain_years'])
                 body = tamCommonLib.table_html_with_rn(meet_list, '')
-                send_mail('yongqis@amazon.com', mail_list, 'Bond List can buy', body, [], 'html')
+                send_mail('yongqis@amazon.com', mail_list, '[AAA_bonds] buy list', body, [], 'html')
 
             if datetime.datetime.now().hour>15:
                 break
