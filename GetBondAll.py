@@ -130,6 +130,7 @@ if __name__ == '__main__':
                 driver.find_element_by_id('aw-login-user-password').send_keys(credentials.jisilu_password)  # 定位并输入用户名
                 driver.find_element_by_id('login_submit').click()
 
+            #取企业债数据
             time.sleep(3)
             driver.implicitly_wait(30)
             driver.get(url)
@@ -173,19 +174,19 @@ if __name__ == '__main__':
                             diff = int(round(float(duration[1]) - float(duration[0]),0))
                             xdate=str(int(row[4][:4])-diff)+row[4][4:]
                             if loc is None:
-                                cursor.execute("insert finance.bond_all(code,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s',%s,'%s','%s','n')"%(row[0],row[1],row[3],xdate,row[4]))
+                                cursor.execute("insert finance.bond_all(code,name,coupon,mat_xdate,mat_ydate,is_review,type) values('%s','%s',%s,'%s','%s','n','corp')"%(row[0],row[1],row[3],xdate,row[4]))
                             else:
-                                cursor.execute("insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s','%s',%s,'%s','%s','n')" % (
+                                cursor.execute("insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review,type) values('%s','%s','%s',%s,'%s','%s','n','corp')" % (
                                     row[0], loc, row[1], row[3], xdate, row[4]))
                             conn.commit()
                         else:
                             if loc is None:
                                 cursor.execute(
-                                    "insert finance.bond_all(code,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s',%s,'%s',null,'n')" % (
+                                    "insert finance.bond_all(code,name,coupon,mat_xdate,mat_ydate,is_review,type) values('%s','%s',%s,'%s',null,'n','corp')" % (
                                         row[0], row[1], row[3], row[4]))
                             else:
                                 cursor.execute(
-                                "insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review) values('%s','%s','%s',%s,'%s',null,'n')" % (
+                                "insert finance.bond_all(code,loc,name,coupon,mat_xdate,mat_ydate,is_review,type) values('%s','%s','%s',%s,'%s',null,'n','corp')" % (
                                 row[0],loc, row[1], row[3], row[4]))
                             conn.commit()
 
