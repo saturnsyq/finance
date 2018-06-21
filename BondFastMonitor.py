@@ -126,6 +126,7 @@ if __name__ == '__main__':
             r = requests.get("http://hq.sinajs.cn/list=%s"%bond_str)
             ret_list=r.text.split(';\n')
             meet_list = []
+            data_list=[]
             for each in ret_list:
                 temp=re.findall(r'^var hq_str_(\w+)="(.*)"$',each)
                 if len(temp)==0 or len(temp[0][1])==0: continue
@@ -165,12 +166,16 @@ if __name__ == '__main__':
                     code_link = 'https://www.jisilu.cn/data/bond/detail/%s' % row[1]
                     html_code = '<a href="%s">%s</a>' % (code_link, row[1])
                     meet_list.append([html_code, row[6], s1_p, s1_v, row[5],mat,round(span,2)])
+                    data_list.append([row[1], row[6], s1_p, s1_v, row[5],mat,round(span,2)])
                     send_list[row[0]]=1
                 #calculate ydate
             if len(meet_list)>0:
                 meet_list.insert(0, ['code', 'name','price', 'vol', 'ytm_bar','mature_date','remain_years'])
                 body = tamCommonLib.table_html_with_rn(meet_list, '')
                 send_mail('yongqis@amazon.com', mail_list, '[AAA_bonds] buy list', body, [], 'html')
+                sql="insert finance.bond_monitor_log(code,monitor_type,price,volume,ytm_bar,mat_date,remain_years) "+"\n union".join([ " select '%s','golden',%s,%s,%s,'%s',%s "%(row[0],row[2],row[3],row[4],row[5],row[6]) for row in data_list])
+                cursor.execute(sql)
+                conn.commit()
 
             if datetime.datetime.now().hour>15:
                 break
